@@ -1,0 +1,201 @@
+---
+layout: post
+title: Linux正则表达式
+category: Linux
+keywords: Linux,2017
+---
+
+<!DOCTYPE html><html><head><title>正则表达式的概念及特点：</title><meta charset='utf-8'><link href='https://dn-maxiang.qbox.me/res-min/themes/marxico.css' rel='stylesheet'><style>
+.note-content  {font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", STHeiti, "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, Song, sans-serif;}
+
+</style></head><body><div id='preview-contents' class='note-content'>
+                        
+                    
+
+
+
+
+<p>很多时候我们有对Linux系统的文件进行文本检索或者说是文本查找的需要，这时我们就需要利用到正则表达式<code>“grep”（Regular Expression）</code>。对需要进行检索或查找的字符串进行逻辑操作，就是利用实现定义好的字符、及特定字符的组合，组成“规则字符串”，用来表达对字符串进行逻辑过滤。说白了就是用逻辑定义好的特定规则，利用逻辑组合成的正则表达式，检索出<strong>符合规则</strong>的文本，这就是正则表达式。</p>
+
+
+
+<h4 id="正则表达式的特点">正则表达式的特点：</h4>
+
+<ul><li>验证字符串，即验证给定的字符串或子字符串是否符合指定的特征，例如，验证邮箱地址是否合法等。</li>
+<li>查找字符串，从给定的文本当中查找符合指定特征的字符串。</li>
+<li>替换字符串，即查找到符合特征的字符串后将其替换。</li>
+<li>提取字符串，即从给定的字符串中提取符合指定特征的子字符串。</li>
+</ul>
+
+<h4 id="常用字符及特殊符号">常用字符及特殊符号：</h4>
+
+<table>
+<thead>
+<tr>
+  <th align="center">RE字符</th>
+  <th align="center">基础正则表达式字符</th>
+</tr>
+</thead>
+<tbody><tr>
+  <td align="center">^hello</td>
+  <td align="center">待查找的字符串（hello）</td>
+</tr>
+<tr>
+  <td align="center">hello$</td>
+  <td align="center">待查找的字符串（hello）在行尾</td>
+</tr>
+<tr>
+  <td align="center">.</td>
+  <td align="center">代表一定有一个任意字符的字符</td>
+</tr>
+<tr>
+  <td align="center">\</td>
+  <td align="center">转义字符，将特殊符号的特殊意义去除</td>
+</tr>
+<tr>
+  <td align="center">*</td>
+  <td align="center">重复零个到无穷多个的前一个字符</td>
+</tr>
+<tr>
+  <td align="center">[list]</td>
+  <td align="center">从字符集合的RE字符里面找出想要选取的字符</td>
+</tr>
+<tr>
+  <td align="center">[n1-n2]</td>
+  <td align="center">从字符集合的RE字符里面找出想要选取的字符范围</td>
+</tr>
+<tr>
+  <td align="center">[^list]</td>
+  <td align="center">从字符集合的RE字符里面找出不要的字符串或范围</td>
+</tr>
+<tr>
+  <td align="center">{n,m}</td>
+  <td align="center">连续n到m个的前一个RE字符，若为{n}则是连续n个的前一个RE字符，若为{n,}则是连续n个以上的前一个RE字符</td>
+</tr>
+<tr>
+  <td align="center"><strong>RE字符</strong></td>
+  <td align="center"><strong>扩展正则表达式字符</strong></td>
+</tr>
+<tr>
+  <td align="center">﹢</td>
+  <td align="center">重复一个或一个以上的前一个RE字符</td>
+</tr>
+<tr>
+  <td align="center">?</td>
+  <td align="center">零个或一个的前一个RE字符</td>
+</tr>
+<tr>
+  <td align="center"></td>
+  <td align="center">用或（or）的方式找出数个字符</td>
+</tr>
+<tr>
+  <td align="center">( )</td>
+  <td align="center">找出“组”字符串</td>
+</tr>
+<tr>
+  <td align="center">( )+</td>
+  <td align="center">多个重复组的判别</td>
+</tr>
+<tr>
+  <td align="center"><strong>特殊符号</strong></td>
+  <td align="center"><strong>代表意义</strong></td>
+</tr>
+<tr>
+  <td align="center">[[:alpha:]]</td>
+  <td align="center">表示任意大小写字母</td>
+</tr>
+<tr>
+  <td align="center">[[:lower:]]</td>
+  <td align="center">表示任意小写字母</td>
+</tr>
+<tr>
+  <td align="center">[[:upper:]]</td>
+  <td align="center">表示任意大写字母</td>
+</tr>
+<tr>
+  <td align="center">[[:digit:]]</td>
+  <td align="center">表示0到9之间的任意单个数字（包括0和9）</td>
+</tr>
+<tr>
+  <td align="center">[[:alnum:]]</td>
+  <td align="center">表示任意数字或字母</td>
+</tr>
+<tr>
+  <td align="center">[[:space:]]</td>
+  <td align="center">表示任意空白字符，包括”空格”、”tab键”等</td>
+</tr>
+<tr>
+  <td align="center">[[:punct:]]</td>
+  <td align="center">表示任意标点符号</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+
+
+<h4 id="实例实践">实例实践：</h4>
+
+<p>文件中有三行文本，每行都包含“guangdonghuizhou”这个单词，此时可以利用grep在此文本中搜索包含“guangdonghuizhou”的行，则可以使用如下命令。</p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos6</span> ~]<span class="hljs-meta"># grep <span class="hljs-string">"guangdonghuizhou"</span> regex </span><br>hello  guangdonghuizhou <br>hi      guangdonghuizhou<br>hello   guangdonghuizhou<br></code></pre>
+
+<p><em>匹配到字符串每一行匹配到的都会被打印出来。</em></p>
+
+<hr>
+
+<p>如果我们只想要打印出以“hello”开头的行，那我们可以如下所示：</p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos6</span> ~]<span class="hljs-meta"># grep <span class="hljs-string">"^hello"</span> regex</span><br>hello guangdonghuizhou<br>hello   guangdonghuizhou<br></code></pre>
+
+<p><em>“^”表示”锚定首行“，所以”^hello”表示只匹配位于首行的hello字符串。</em></p>
+
+<hr>
+
+<p>在正则表达式中，* 代表另一个意思，在正则表达式中，* 表示之前的字符连续出现任意次（包括0次），不要与通配符中的*搞混淆了。示例如下：</p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos6</span> ~]<span class="hljs-meta"># grep -n <span class="hljs-string">"e*f"</span> regex.txt </span><br><span class="hljs-number">9</span>:ef eef eeef<br></code></pre>
+
+<p><em>如上图操作，”e*f”表示e出现任意次，f必须跟在e的后头。</em></p>
+
+<hr>
+
+<p>理解完上述符号后，我们再来认识两个符号，”\?”与”+”</p>
+
+<ul><li>\? 表示匹配其前面的字符0或1次，简单理解，就是前面的字符要么有没有，要么有一个。</li>
+<li>+ 表示匹配其前面的字符至少1次，简单理解，就是前面的字符必须有至少一个。 <br>
+我们来看看示例，如下：</li>
+</ul>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs vim">[root@centos6 ~]# <span class="hljs-keyword">grep</span> <span class="hljs-string">"abc\?"</span> regex.txt    <br><span class="hljs-keyword">ab</span> <span class="hljs-keyword">abc</span> abcc<br></code></pre>
+
+<p><em>如上图操作，”\？”表示c出现0次或者1次，都会被匹配到，所以ab和abc都被匹配到，ab被匹配到是因为c出现了0次，abc被匹配是因为出现了1次。</em></p>
+
+<hr>
+
+<p>再来我们实践另外一个符号，如下：</p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs vim">[root@centos6 ~]# <span class="hljs-keyword">grep</span> <span class="hljs-string">"abc\?"</span> regex.txt     <br><span class="hljs-keyword">ab</span> <span class="hljs-keyword">abc</span> abcc<br></code></pre>
+
+<p><em>可以看到，abc与abcc都被匹配到了，这是因为c+”表示c至少要出现1次，至多可以连续出现多次，连续次数不封顶，所以abc和abcc都会被匹配到。</em></p>
+
+<p><strong>以上如有不对的地方，请批评指正。</strong></p>
+
+
+
+<h4 id="扩展阅读与参考文献">扩展阅读与参考文献：</h4>
+
+<p><a href="http://www.cnblogs.com/zhuzhenwei918/p/6196661.html" target="_blank">正则表达式之基本概念 - Wayne-Zhu - 博客园 </a> <br>
+<a href="http://blog.csdn.net/suwu150/article/details/52227409" target="_blank">正则表达式介绍与使用 - suwu150的博客 - CSDN博客</a> <br>
+<a href="http://linux.vbird.org/linux_basic/0330regularex.php" target="_blank">鳥哥的 Linux 私房菜 – 第十一章、正規表示法與文件格式化處理</a>  </p></div></body></html>
