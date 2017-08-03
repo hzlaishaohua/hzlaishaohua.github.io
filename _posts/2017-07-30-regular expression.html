@@ -4,7 +4,6 @@ title: Linux正则表达式
 category: Linux
 keywords: Linux,2017
 ---
-
 <!DOCTYPE html><html><head><title>正则表达式的概念及特点：</title><meta charset='utf-8'><link href='https://dn-maxiang.qbox.me/res-min/themes/marxico.css' rel='stylesheet'><style>
 .note-content  {font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", STHeiti, "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, Song, sans-serif;}
 
@@ -14,6 +13,7 @@ keywords: Linux,2017
 
 
 
+<h2 id="正则表达式的概念及特点">正则表达式的概念及特点：</h2>
 
 <p>很多时候我们有对Linux系统的文件进行文本检索或者说是文本查找的需要，这时我们就需要利用到正则表达式<code>“grep”（Regular Expression）</code>。对需要进行检索或查找的字符串进行逻辑操作，就是利用实现定义好的字符、及特定字符的组合，组成“规则字符串”，用来表达对字符串进行逻辑过滤。说白了就是用逻辑定义好的特定规则，利用逻辑组合成的正则表达式，检索出<strong>符合规则</strong>的文本，这就是正则表达式。</p>
 
@@ -26,6 +26,8 @@ keywords: Linux,2017
 <li>替换字符串，即查找到符合特征的字符串后将其替换。</li>
 <li>提取字符串，即从给定的字符串中提取符合指定特征的子字符串。</li>
 </ul>
+
+
 
 <h4 id="常用字符及特殊符号">常用字符及特殊符号：</h4>
 
@@ -149,8 +151,6 @@ keywords: Linux,2017
 
 <p>如果我们只想要打印出以“hello”开头的行，那我们可以如下所示：</p>
 
-
-
 <pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos6</span> ~]<span class="hljs-meta"># grep <span class="hljs-string">"^hello"</span> regex</span><br>hello guangdonghuizhou<br>hello   guangdonghuizhou<br></code></pre>
 
 <p><em>“^”表示”锚定首行“，所以”^hello”表示只匹配位于首行的hello字符串。</em></p>
@@ -158,8 +158,6 @@ keywords: Linux,2017
 <hr>
 
 <p>在正则表达式中，* 代表另一个意思，在正则表达式中，* 表示之前的字符连续出现任意次（包括0次），不要与通配符中的*搞混淆了。示例如下：</p>
-
-
 
 <pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos6</span> ~]<span class="hljs-meta"># grep -n <span class="hljs-string">"e*f"</span> regex.txt </span><br><span class="hljs-number">9</span>:ef eef eeef<br></code></pre>
 
@@ -174,8 +172,6 @@ keywords: Linux,2017
 我们来看看示例，如下：</li>
 </ul>
 
-
-
 <pre class="prettyprint hljs-dark"><code class="hljs vim">[root@centos6 ~]# <span class="hljs-keyword">grep</span> <span class="hljs-string">"abc\?"</span> regex.txt    <br><span class="hljs-keyword">ab</span> <span class="hljs-keyword">abc</span> abcc<br></code></pre>
 
 <p><em>如上图操作，”\？”表示c出现0次或者1次，都会被匹配到，所以ab和abc都被匹配到，ab被匹配到是因为c出现了0次，abc被匹配是因为出现了1次。</em></p>
@@ -184,15 +180,11 @@ keywords: Linux,2017
 
 <p>再来我们实践另外一个符号，如下：</p>
 
-
-
 <pre class="prettyprint hljs-dark"><code class="hljs vim">[root@centos6 ~]# <span class="hljs-keyword">grep</span> <span class="hljs-string">"abc\?"</span> regex.txt     <br><span class="hljs-keyword">ab</span> <span class="hljs-keyword">abc</span> abcc<br></code></pre>
 
 <p><em>可以看到，abc与abcc都被匹配到了，这是因为c+”表示c至少要出现1次，至多可以连续出现多次，连续次数不封顶，所以abc和abcc都会被匹配到。</em></p>
 
 <p><strong>以上如有不对的地方，请批评指正。</strong></p>
-
-
 
 <h4 id="扩展阅读与参考文献">扩展阅读与参考文献：</h4>
 
