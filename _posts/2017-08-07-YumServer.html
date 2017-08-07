@@ -1,0 +1,122 @@
+---
+layout: post
+title: YUM源及YUM仓库服务搭建
+category: Linux
+keywords: Linux,2017
+---
+<!DOCTYPE html><html><head><title></title><meta charset='utf-8'><link href='https://dn-maxiang.qbox.me/res-min/themes/marxico.css' rel='stylesheet'><style>
+.note-content  {font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", STHeiti, "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, Song, sans-serif;}
+
+</style></head><body><div id='preview-contents' class='note-content'>
+                        
+                    
+
+
+
+
+
+<p>在linux下的我们可以使用软件管理RPM和YUM来进行软件的安装与升级。在用RPM进行软件安装时会遇到软件之间的依赖关系问题，在安装过程通过手动解决依赖关系与兼容的问题会比较麻烦。而解决RPM属性依赖的方法就是采用YUM工具来进行软件的自动安装和自动升级，整个过程都是全自动方式进行无需用户干预，只需输入安装命令，系统会取得CentOS放置在YUM的服务器内的软件相关性的清单列表然后分析这些软件的依赖属性，通过清单列表的数据与本机RPM数据库/var/cache/yum的软件数据相比较，就能够安装所需要的依赖属性的软件。 <br>
+虽然CentOS提供了在线YUM源下载，但可能会由于网络环境的限制，导致软件安装耗时过长甚至失败，这时我们有必要利用本地或第三方的YUM源来优化整个的YUM下载环境。</p>
+
+
+
+<h4 id="1环境搭建准备">1.环境搭建准备</h4>
+
+<p><em>搭建基于YUM服务器环境需要临时关闭系统防火墙</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># systemctl disable firewalld.service </span><br></code></pre>
+
+<p><em>查看iptables列表是否停止访问策略</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># iptables -vnL</span><br></code></pre>
+
+<p><em>由于SELinux，有些Linux系统上应用程序运行时会被拒绝，会导致实验进行无法进行，所以我们将vim /etc/selinux/config，设置为SELINUX=permissive。</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs ini"><span class="hljs-section">[root@centos7 ~]</span><span class="hljs-comment"># vim /etc/selinux/config</span><br><span class="hljs-attr">SELINUX</span>=permissive<br></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># setenforce 0 表示关闭selinux防火墙</span><br>[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># getenforce 验证是否生效</span><br></code></pre>
+
+
+
+<hr>
+
+
+
+<h4 id="搭建环境准备好后就进入到实验步骤">搭建环境准备好后就进入到实验步骤：</h4>
+
+<p>1、安装ftp服务包</p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs clean">[root@centos7 ~]# rpm -ivh /run/media/root/CentOS\ <span class="hljs-number">7</span>\ x86_64/Packages/vsftpd<span class="hljs-number">-3.0</span><span class="hljs-number">.2</span><span class="hljs-number">-21.</span>el7.x86_64.rpm<br>Preparing...                          ################################# [<span class="hljs-number">100</span>%]<br>        package vsftpd<span class="hljs-number">-3.0</span><span class="hljs-number">.2</span><span class="hljs-number">-21.</span>el7.x86_64 is already installed<br></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs dts">[root@centos7 ~]<span class="hljs-meta"># rpm -ql vsftpd</span><br><span class="hljs-meta-keyword">/etc/</span>logrotate.d/vsftpd<br><span class="hljs-meta-keyword">/etc/</span>pam.d/vsftpd<br><span class="hljs-meta-keyword">/etc/</span>vsftpd<br><span class="hljs-meta-keyword">/etc/</span>vsftpd/ftpusers<br><span class="hljs-meta-keyword">/etc/</span>vsftpd/user_list<br><span class="hljs-meta-keyword">/etc/</span>vsftpd/vsftpd.conf<br><span class="hljs-meta-keyword">/etc/</span>vsftpd/vsftpd_conf_migrate.sh<br></code></pre>
+
+<p><em>查看vsftpd是否安装成功</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># systemctl start vsftpd  启动ftp服务</span><br></code></pre>
+
+<p><em>ss -tnl  命令确认ftp是否正常开启</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs css"><span class="hljs-selector-attr">[root@centos7 ~]</span># <span class="hljs-selector-tag">ss</span> <span class="hljs-selector-tag">-tnl</span><br><span class="hljs-selector-tag">State</span>      <span class="hljs-selector-tag">Recv-Q</span> <span class="hljs-selector-tag">Send-Q</span> <span class="hljs-selector-tag">Local</span> <span class="hljs-selector-tag">Address</span><span class="hljs-selector-pseudo">:Port</span>                <span class="hljs-selector-tag">Peer</span> <span class="hljs-selector-tag">Address</span><span class="hljs-selector-pseudo">:Port</span>              <br><br><span class="hljs-selector-tag">LISTEN</span>     0      128                *<span class="hljs-selector-pseudo">:22</span>                                          <br><br><span class="hljs-selector-tag">LISTEN</span>     0      32                :<span class="hljs-selector-pseudo">::21</span>                           <br></code></pre>
+
+<hr>
+
+<p>2、准备CentOS 6,7 YUM源 系统安装包 <br>
+<em>在YUM服务器/var/ftp/pub/下分别建立6, 7目录用于放置安装包</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs coffeescript">[root@centos7 ~]<span class="hljs-comment"># mkdir -p /var/ftp/pub/centos/{6,7} 分别建立存放目录</span><br>[root@centos7 ~]<span class="hljs-comment"># tree /var/ftp/pub/centos/    </span><br><span class="hljs-regexp">/var/ftp/pub/centos/</span><br>├── <span class="hljs-number">6</span><br>└── <span class="hljs-number">7</span><br></code></pre>
+
+<p><em>将系统安装盘安装包分别cp 到指定目录</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit">[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># cp -r /run/media/root/CentOS\ 7\ x86_64/* /var/ftp/pub/centos/7</span><br><br>[root<span class="hljs-symbol">@centos7</span> ~]<span class="hljs-meta"># cp -r /run/media/root/CentOS\ 6\ x86_64/* /var/ftp/pub/centos/6</span><br></code></pre>
+
+<hr>
+
+<p>3、 客户端配置 <br>
+<em>在客户端修改repo源仓库以致能正确获取搭建服务器的YUM源仓库</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs stylus">[root@centos6 ~ <span class="hljs-number">167</span>]<span class="hljs-selector-id">#vim</span> /etc/yum<span class="hljs-selector-class">.repos</span><span class="hljs-selector-class">.d</span>/base<span class="hljs-selector-class">.repo</span> <br>  <span class="hljs-number">1</span> [base]<br>  <span class="hljs-number">2</span> name=centos<br>  <span class="hljs-number">3</span> #baseurl=file:<span class="hljs-comment">///misc/cd/</span><br>  <span class="hljs-number">4</span> baseurl=ftp:<span class="hljs-comment">//192.168.72.145/pub/centos/$releasever/ 指定YUM源仓库</span><br>  <span class="hljs-number">5</span> gpgcheck=<span class="hljs-number">0</span><br>  <span class="hljs-number">6</span> enabled=<span class="hljs-number">1</span><br></code></pre>
+
+<p><em>清除客户端缓存目录(/var/cache/yum)下的软件包及旧的headers</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-bash hljs">[root@centos6 ~ 7]<span class="hljs-comment">#yum clean all</span><br></code></pre>
+
+<p><em>获取当前系统有效的repolist</em></p>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs applescript">[root@centos6 ~ <span class="hljs-number">10</span>]<span class="hljs-comment">#yum repolist</span><br>Loaded plugins: fastestmirror, refresh-packagekit, security<br>Loading mirror speeds <span class="hljs-keyword">from</span> cached hostfile<br>repo <span class="hljs-built_in">id</span>                                      repo <span class="hljs-built_in">name</span>                                    status<br>base                                         centos                                       <span class="hljs-number">6</span>,<span class="hljs-number">706</span><br>repolist: <span class="hljs-number">6</span>,<span class="hljs-number">706</span><br></code></pre>
+
+<hr>
+
+<p><strong>以上为多系统网络YUM服务器配置实验</strong></p>
+
+
+
+<h4 id="扩展阅读与参考文献">扩展阅读与参考文献：</h4>
+
+<p><a href="http://yum.baseurl.org/" target="_blank">Yum包管理器</a> <br>
+<a href="http://linux.vbird.org/linux_basic/0520rpm_and_srpm.php" target="_blank">鳥哥-軟體安裝 RPM, SRPM 與 YUM</a></p></div></body></html>
